@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/algo-visualizer/static/css/main.106cf286.chunk.css",
+    "main.js": "/algo-visualizer/static/js/main.e710893d.chunk.js",
+    "main.js.map": "/algo-visualizer/static/js/main.e710893d.chunk.js.map",
+    "runtime-main.js": "/algo-visualizer/static/js/runtime-main.d52ed388.js",
+    "runtime-main.js.map": "/algo-visualizer/static/js/runtime-main.d52ed388.js.map",
+    "static/js/2.638dc8ab.chunk.js": "/algo-visualizer/static/js/2.638dc8ab.chunk.js",
+    "static/js/2.638dc8ab.chunk.js.map": "/algo-visualizer/static/js/2.638dc8ab.chunk.js.map",
+    "static/js/3.cb1bd539.chunk.js": "/algo-visualizer/static/js/3.cb1bd539.chunk.js",
+    "static/js/3.cb1bd539.chunk.js.map": "/algo-visualizer/static/js/3.cb1bd539.chunk.js.map",
+    "index.html": "/algo-visualizer/index.html",
+    "static/css/main.106cf286.chunk.css.map": "/algo-visualizer/static/css/main.106cf286.chunk.css.map",
+    "static/js/2.638dc8ab.chunk.js.LICENSE.txt": "/algo-visualizer/static/js/2.638dc8ab.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.d52ed388.js",
+    "static/js/2.638dc8ab.chunk.js",
+    "static/css/main.106cf286.chunk.css",
+    "static/js/main.e710893d.chunk.js"
+  ]
+}
