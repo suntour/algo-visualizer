@@ -14,30 +14,40 @@ export default class SortingVisualizer extends React.Component {
     super(props);
 
     this.state = {
-      array: [],
-      sorted: false,
-      sortInProgress: false,
-      awaitingReset: false,
+      array: [], //array to track the value of the bars
+      sorted: false, //boolean to track whether array is sorted
+      sortInProgress: false, //boolean to track whether a sort is currently in progress
+      awaitingReset: false, //boolean that used to halt any sortings in progress
     };
   }
 
+  //Check if a new sort should begin
+  shouldStartNewSort() {
+    if (this.state.sorted || this.state.sortInProgress) {
+      return false;
+    }
+    return true;
+  }
+
   async bubbleSort() {
-    if (this.state.sorted) {
+    let shouldStart = this.shouldStartNewSort();
+    if (!shouldStart) {
       return;
     }
-    if (this.state.sortInProgress) {
-      return;
-    }
-    this.state.sortInProgress = true;
+
+    await this.setState({ sortInProgress: true });
+    //Keep track of how many times we've iterated
     let round = 0;
     const arrayBars = document.getElementsByClassName("array-bar");
     let innerSorted = false;
 
     while (!this.state.sorted && this.state.sortInProgress && !innerSorted) {
       innerSorted = true;
+    
+      //Check array for any i > i+1
       for (let i = 0; i < this.state.array.length - 1 - round; i++) {
         if (this.state.awaitingReset) {
-          this.state.awaitingReset = false;
+          await this.setState({ awaitingReset: false });
           return;
         }
         const leftBarColor = arrayBars[i].style;
@@ -61,7 +71,7 @@ export default class SortingVisualizer extends React.Component {
 
           tempArr[i + 1] = tempArr[i];
           tempArr[i] = temp;
-          this.setState({ array: tempArr });
+          await this.setState({ array: tempArr });
         }
 
         changeBarsToColor(NORMAL_COLOR);
@@ -70,12 +80,14 @@ export default class SortingVisualizer extends React.Component {
       changeBarToColor(this.state.array.length - round - 1, COMPLETE_COLOR);
       round++;
     }
-    this.state.sorted = true;
+
+    //At this point, we know the rest are in order, no need to check
+    await this.setState({ sorted: true });
 
     for (let i = 0; i < this.state.array.length - round; i++) {
       changeBarToColor(i, COMPLETE_COLOR);
     }
-    this.state.sortInProgress = false;
+    await this.setState({ sortInProgress: false });
 
     function changeBarToColor(index, color) {
       arrayBars[index].style.backgroundColor = color;
@@ -90,15 +102,15 @@ export default class SortingVisualizer extends React.Component {
     this.reset();
   }
 
-  reset() {
+  async reset() {
     if (this.state.sortInProgress) {
-      this.setState({ awaitingReset: true });
+      await this.setState({ awaitingReset: true });
     }
 
     this.resetArray();
     this.resetColors();
-    this.setState({ sorted: false });
-    this.setState({ sortInProgress: false });
+    await this.setState({ sorted: false });
+    await this.setState({ sortInProgress: false });
   }
 
   resetColors() {
@@ -108,18 +120,19 @@ export default class SortingVisualizer extends React.Component {
     }
   }
 
-  resetArray() {
+  async resetArray() {
     this.resetColors();
     this.forceUpdate();
     const array = [];
     for (let i = 0; i < NUMBER_OF_ARRAY_BARS; i++) {
       array.push(randomIntFromInterval(5, 80));
     }
-    this.setState({ array });
+    await this.setState({ array: array });
   }
 
   render() {
     const { array } = this.state;
+    
     return (
       <div className="visualizer-container">
         <div className="array-container">
