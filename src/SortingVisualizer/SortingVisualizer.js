@@ -92,13 +92,13 @@ export default class SortingVisualizer extends React.Component {
 
   reset() {
     if (this.state.sortInProgress) {
-      this.state.awaitingReset = true;
+      this.setState({ awaitingReset: true });
     }
 
     this.resetArray();
     this.resetColors();
-    this.state.sorted = false;
-    this.state.sortInProgress = false;
+    this.setState({ sorted: false });
+    this.setState({ sortInProgress: false });
   }
 
   resetColors() {
@@ -131,7 +131,7 @@ export default class SortingVisualizer extends React.Component {
                 backgroundColor: NORMAL_COLOR,
                 height: `${value}%`,
                 width: `${(100 * 0.5) / NUMBER_OF_ARRAY_BARS}%`,
-                margin: "0 " + `${(100 * 0.25) / NUMBER_OF_ARRAY_BARS}%`,
+                margin: `0 ${(100 * 0.25) / NUMBER_OF_ARRAY_BARS}%`,
               }}
             ></div>
           ))}
