@@ -1,8 +1,8 @@
 import React from "react";
 import "./SortingVisualizer.css";
 
-const NUMBER_OF_ARRAY_BARS = 50;
-const ANIMATION_SPEED = 1;
+const NUMBER_OF_ARRAY_BARS = 30;
+const ANIMATION_SPEED = 5;
 
 const NORMAL_COLOR = "white";
 const COMPARE_COLOR = "orange";
@@ -15,6 +15,7 @@ export default class SortingVisualizer extends React.Component {
 
     this.state = {
       array: [], //array to track the value of the bars
+      colorArr: [], //array to track the colors of the bars
       sorted: false, //boolean to track whether array is sorted
       sortInProgress: false, //boolean to track whether a sort is currently in progress
       awaitingReset: false, //boolean that used to halt any sortings in progress
@@ -30,40 +31,34 @@ export default class SortingVisualizer extends React.Component {
   }
 
   async bubbleSort() {
-    let shouldStart = this.shouldStartNewSort();
-    if (!shouldStart) {
+    if (!this.shouldStartNewSort()) {
       return;
     }
 
     await this.setState({ sortInProgress: true });
     //Keep track of how many times we've iterated
     let round = 0;
-    const arrayBars = document.getElementsByClassName("array-bar");
     let innerSorted = false;
 
-    while (!this.state.sorted && this.state.sortInProgress && !innerSorted) {
+    while (!innerSorted) {
       innerSorted = true;
-    
-      //Check array for any i > i+1
+
       for (let i = 0; i < this.state.array.length - 1 - round; i++) {
+        //If we are awaiting a reset, stop immediately and update state
         if (this.state.awaitingReset) {
           await this.setState({ awaitingReset: false });
+          await this.setState({ sortInProgress: false });
           return;
         }
-        const leftBarColor = arrayBars[i].style;
-        const rightBarColor = arrayBars[i + 1].style;
 
-        function changeBarsToColor(color) {
-          leftBarColor.backgroundColor = color;
-          rightBarColor.backgroundColor = color;
-        }
-
-        changeBarsToColor(COMPARE_COLOR);
+        this.changeBarColors(i, COMPARE_COLOR, i + 1);
         await this.sleep(ANIMATION_SPEED);
 
+        //Not in order found
         if (this.state.array[i] > this.state.array[i + 1]) {
           innerSorted = false;
-          changeBarsToColor(SWAP_COLOR);
+
+          this.changeBarColors(i, SWAP_COLOR, i + 1);
           await this.sleep(ANIMATION_SPEED);
 
           let tempArr = this.state.array.slice();
@@ -74,23 +69,35 @@ export default class SortingVisualizer extends React.Component {
           await this.setState({ array: tempArr });
         }
 
-        changeBarsToColor(NORMAL_COLOR);
+        this.changeBarColors(i, NORMAL_COLOR, i + 1);
         await this.sleep(ANIMATION_SPEED);
       }
-      changeBarToColor(this.state.array.length - round - 1, COMPLETE_COLOR);
+
+      //Every sweep, we update the highest bar to completed
+      this.changeBarColors(this.state.array.length - round - 1, COMPLETE_COLOR);
       round++;
     }
 
-    //At this point, we know the rest are in order, no need to check
+    //At this point, we know the rest are in order
     await this.setState({ sorted: true });
-
-    for (let i = 0; i < this.state.array.length - round; i++) {
-      changeBarToColor(i, COMPLETE_COLOR);
-    }
     await this.setState({ sortInProgress: false });
+    this.changeBarColors(0, COMPLETE_COLOR, this.state.array.length - round);
+  }
 
-    function changeBarToColor(index, color) {
-      arrayBars[index].style.backgroundColor = color;
+  changeBarColors(indexStart, color, indexEnd) {
+    if (indexStart == null || !color) {
+      return;
+    }
+    let tempColorArr = this.state.colorArr.slice();
+
+    if (indexEnd == null) {
+      tempColorArr[indexStart] = color;
+      this.setState({ colorArr: tempColorArr });
+    } else {
+      for (let i = indexStart; i <= indexEnd; i++) {
+        tempColorArr[i] = color;
+        this.setState({ colorArr: tempColorArr });
+      }
     }
   }
 
@@ -106,23 +113,20 @@ export default class SortingVisualizer extends React.Component {
     if (this.state.sortInProgress) {
       await this.setState({ awaitingReset: true });
     }
-
     this.resetArray();
     this.resetColors();
     await this.setState({ sorted: false });
-    await this.setState({ sortInProgress: false });
   }
 
-  resetColors() {
-    for (let i = 0; i < this.state.array.length; i++) {
-      const arrayBars = document.getElementsByClassName("array-bar");
-      arrayBars[i].style.backgroundColor = NORMAL_COLOR;
+  async resetColors() {
+    const colorArr = [];
+    for (let i = 0; i < NUMBER_OF_ARRAY_BARS; i++) {
+      colorArr.push(NORMAL_COLOR);
     }
+    await this.setState({ colorArr: colorArr });
   }
 
   async resetArray() {
-    this.resetColors();
-    this.forceUpdate();
     const array = [];
     for (let i = 0; i < NUMBER_OF_ARRAY_BARS; i++) {
       array.push(randomIntFromInterval(5, 80));
@@ -131,8 +135,7 @@ export default class SortingVisualizer extends React.Component {
   }
 
   render() {
-    const { array } = this.state;
-    
+    const { array, colorArr } = this.state;
     return (
       <div className="visualizer-container">
         <div className="array-container">
@@ -141,17 +144,18 @@ export default class SortingVisualizer extends React.Component {
               className="array-bar"
               key={idx}
               style={{
-                backgroundColor: NORMAL_COLOR,
+                backgroundColor: `${colorArr[idx]}`,
                 height: `${value}%`,
-                width: `${(100 * 0.5) / NUMBER_OF_ARRAY_BARS}%`,
-                margin: `0 ${(100 * 0.25) / NUMBER_OF_ARRAY_BARS}%`,
+                width: `${50 / NUMBER_OF_ARRAY_BARS}%`,
+                margin: `0 ${25 / NUMBER_OF_ARRAY_BARS}%`,
               }}
             ></div>
           ))}
         </div>
         <div className="menu-container">
           <button onClick={() => this.reset()}>Generate</button>
-          <button onClick={() => this.bubbleSort()}>Bubble</button>
+          <button onClick={() => this.bubbleSort()}>Bubble sort</button>
+          <button>TODO: Quick sort</button>
         </div>
       </div>
     );
