@@ -15,9 +15,10 @@
   margin: 2% 10% 2% 10%;
 }
 
-/* .array-bar {
-  background-color: black;
-} */
+.array-bar p{
+  color: black;
+  text-align: center;
+}
 
 .menu-container {
   height: 30%;
